@@ -1,7 +1,7 @@
 slang_shaders_name='slang-shaders'
 slang_shaders_version='1.0'
 slang_shaders_url='https://github.com/libretro/slang-shaders.git'
-slang_shaders_hash='46dcd51d14efd2d49505d932d6b979f141f538d8'
+slang_shaders_hash='11c7f492a07e4fd8940a7d6b367f85ef7effabea'
 
 ## Build Steps
 slang_shaders_setup() {
