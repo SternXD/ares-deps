@@ -5,9 +5,11 @@
 !/build_deps.sh
 !/deps.macos
 !/deps.windows
+!/deps.windows.uwp
 !/deps.linux
 !/utils.macos
 !/utils.windows
+!/utils.windows.uwp
 !/utils.linux
 !/README.md
 !/patches

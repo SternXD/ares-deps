@@ -1,0 +1,70 @@
+librashader_name='librashader'
+librashader_version='0.10.1-uwp'
+librashader_url='https://github.com/SternXD/librashader.git'
+librashader_hash='6e50a7f56fa35f19ac42d90336290811a1acb78e'
+librashader_profile='release'
+
+librashader_setup() {
+  echo "[librashader] cloning"
+  if [ ! -d "librashader" ]; then
+    git clone ${librashader_url}
+  else
+    git -C librashader fetch
+  fi
+  git -C librashader reset --hard "$librashader_hash"
+
+  if [[ $config == "Debug" ]]; then
+    librashader_profile='debug'
+  elif [[ $config == "Release" ]]; then
+    librashader_profile='optimized'
+  fi
+  echo "[librashader] cloning -- success"
+}
+
+librashader_package_source() {
+  echo "[librashader] packaging source"
+  mkdir -p ../ares-deps-source/src/librashader
+  cp -R librashader/. ../ares-deps-source/src/librashader
+  echo "[librashader] packaging source -- success"
+}
+
+librashader_clean() {
+  echo "[librashader] cleaning up -- skipped"
+}
+
+librashader_patch() {
+  echo "[librashader] patching source"
+  cd librashader
+  echo "Pinning nightly Rust version to 2025-03-21"
+  echo $'[toolchain]' > rust-toolchain.toml
+  echo $'channel = \"nightly-2025-03-21\"' >> rust-toolchain.toml
+  echo $'targets = [ \"x86_64-pc-windows-msvc\" ]' >> rust-toolchain.toml
+  cd ..
+  echo "[librashader] patching source -- success"
+}
+
+librashader_build() {
+  echo "[librashader] building"
+  cd librashader
+  export RUSTFLAGS='-Ctarget-feature=+crt-static'
+  export CXXFLAGS='-MT'
+  export CFLAGS='-MT'
+  cargo run -p librashader-build-script -- --profile ${librashader_profile} -- --no-default-features --features=runtime-d3d11,runtime-d3d12,runtime-opengl
+  unset RUSTFLAGS CXXFLAGS CFLAGS
+  cd ..
+  echo "[librashader] building -- success"
+}
+
+librashader_install() {
+  echo "[librashader] installing"
+  mkdir -p ares-deps/include/librashader/
+  mkdir -p ares-deps/lib/
+  cp -R build_temp/librashader/include/. ares-deps/include/librashader/
+  cp -R build_temp/librashader/target/${librashader_profile}/librashader.d ares-deps/lib/librashader.d
+  cp -R build_temp/librashader/target/${librashader_profile}/librashader.dll ares-deps/lib/librashader.dll
+  cp -R build_temp/librashader/target/${librashader_profile}/librashader.dll.exp ares-deps/lib/librashader.dll.exp
+  cp -R build_temp/librashader/target/${librashader_profile}/librashader.dll.lib ares-deps/lib/librashader.dll.lib
+  mv ares-deps/lib/librashader.dll.lib ares-deps/lib/librashader.lib
+  cp -R build_temp/librashader/target/${librashader_profile}/librashader.pdb ares-deps/lib/librashader.pdb
+  echo "[librashader] installing -- success"
+}
