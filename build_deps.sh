@@ -10,19 +10,25 @@ build_deps() {
   check_architecture arch
   
   config="${1-RelWithDebInfo}"
-  
+
+  variant="${BUILD_VARIANT-}"
+
   # where are we?
   SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-  
+
   # add utils scripts for our platform to this file
   utils_folder="$SCRIPT_DIR/utils.$os"
   for util in "$utils_folder"/*
   do
     source "$util"
   done
-  
+
   # add all dependency script files for our platform to this file
-  deps_folder="$SCRIPT_DIR/deps.$os"
+  if [ -n "$variant" ] && [ -d "$SCRIPT_DIR/deps.$os.$variant" ]; then
+    deps_folder="$SCRIPT_DIR/deps.$os.$variant"
+  else
+    deps_folder="$SCRIPT_DIR/deps.$os"
+  fi
   echo $deps_folder
   dependencies=()
   for dependency in "$deps_folder"/*

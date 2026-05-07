@@ -1,0 +1,76 @@
+sdl_name='SDL3'
+sdl_version='3.4.8'
+sdl_url='https://github.com/SternXD/SDL3-uwp.git'
+sdl_branch='uwp-3.4.8'
+sdl_hash='9e04aa73804f40fd182070c06e1a87fc52162af1'
+SDLARGS=(
+  "-DCMAKE_SYSTEM_NAME=WindowsStore"
+  "-DCMAKE_SYSTEM_VERSION=10.0"
+  "-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY"
+  "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"
+  "-DBUILD_SHARED_LIBS=ON"
+  "-DSDL_SHARED=ON"
+  "-DSDL_STATIC=OFF"
+  "-DSDL_TESTS=OFF"
+  "-DSDL_EXAMPLES=OFF"
+  "-A x64"
+)
+
+## Build Steps
+sdl_setup() {
+  echo "[SDL3] cloning"
+  if [ ! -d "SDL" ]; then
+    git clone --branch ${sdl_branch} ${sdl_url} SDL
+  else
+    git -C SDL fetch
+  fi
+  git -C SDL reset --hard "$sdl_hash"
+  echo "[SDL3] cloning -- success"
+}
+
+sdl_package_source() {
+  echo "[SDL3] packaging source"
+  mkdir -p ../ares-deps-source/src/SDL/
+  cp -R SDL/. ../ares-deps-source/src/SDL
+  echo "[SDL3] packaging source -- success"
+}
+
+sdl_clean() {
+  echo "[SDL3] cleaning up -- skipped"
+}
+
+sdl_patch() {
+  echo "[SDL3] patching -- skipped"
+}
+
+sdl_build() {
+  echo "[SDL3] building"
+
+  cd SDL
+  mkdir -p build-uwp
+  pushd build-uwp
+
+  cmake .. "${SDLARGS[@]}" -G "Visual Studio 17 2022"
+  cmake --build . --config ${config}
+
+  popd
+  cd ..
+  echo "[SDL3] building -- success"
+}
+
+sdl_install() {
+  echo "[SDL3] installing"
+  mkdir -p ares-deps/lib
+  mkdir -p ares-deps/include/SDL3
+  mkdir -p ares-deps/licenses/SDL3
+
+  cp -R build_temp/SDL/build-uwp/${config}/SDL3.dll ares-deps/lib/SDL3.dll
+  cp -R build_temp/SDL/build-uwp/${config}/SDL3.pdb ares-deps/lib/SDL3.pdb
+  cp -R build_temp/SDL/build-uwp/${config}/SDL3.lib ares-deps/lib/SDL3.lib
+  cp -R build_temp/SDL/include/SDL3/. ares-deps/include/SDL3/
+  cp -R build_temp/SDL/build-uwp/include-config-${config}/build_config/. ares-deps/include/SDL3/
+  cp -R build_temp/SDL/LICENSE.txt ares-deps/licenses/SDL3/LICENSE.txt
+  echo "[SDL3] installing -- success"
+}
+
+

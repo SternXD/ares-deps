@@ -25,6 +25,12 @@ jobs:
           shell: 'msys2 {0}'
           msystem: clang64
           install: mingw-w64-clang-x86_64-clang mingw-w64-clang-aarch64-clang
+        - name: windows-uwp-x64
+          os: windows-2025
+          shell: 'msys2 {0}'
+          msystem: clang64
+          install: mingw-w64-clang-x86_64-clang
+          build-variant: uwp
         - name: macos-universal
           os: macos-latest
           compiler: clang++
@@ -78,6 +84,7 @@ jobs:
       working-directory: ${{ github.workspace }}
       env:
         envName: ${{ matrix.platform.name }}
+        BUILD_VARIANT: ${{ matrix.platform.build-variant }}
       run: |
         ./build_deps.sh RelWithDebInfo
         tar -cvJf ares-deps.tar.xz ares-deps
@@ -116,7 +123,7 @@ jobs:
         run: |
           : Decompress build artifacts
           ls **/*
-          for package in macos-universal linux-universal windows-x64 windows-arm64; do
+          for package in macos-universal linux-universal windows-x64 windows-arm64 windows-uwp-x64; do
             tar -xJf ares-deps-${package}/ares-deps.tar.xz
             rm -rf ares-deps-${package}
             mv ares-deps ares-deps-${package}
@@ -162,6 +169,7 @@ jobs:
           files: |
             ${{ github.workspace }}/ares-deps-windows-x64*.*
             ${{ github.workspace }}/ares-deps-windows-arm64*.*
+            ${{ github.workspace }}/ares-deps-windows-uwp-x64*.*
             ${{ github.workspace }}/ares-deps-macos-universal*.*
             ${{ github.workspace }}/ares-deps-linux-universal*.*
        
