@@ -1,0 +1,64 @@
+mesa_name='mesa'
+mesa_version='25.3.3'
+mesa_url='https://github.com/SternXD/mesa-uwp/releases/download/25.3.3/25.3.3.zip'
+mesa_sha256='9b507725c823c86e547d14376be21388995a289f8cad4cd2353248269597947b'
+
+mesa_setup() {
+  echo "[mesa] downloading prebuilt archive"
+  local archive_name="mesa-${mesa_version}.zip"
+  rm -rf mesa mesa_build
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail "${mesa_url}" -o "${archive_name}"
+  elif command -v wget >/dev/null 2>&1; then
+    wget "${mesa_url}" -O "${archive_name}"
+  fi
+
+  local actual_sha256
+  actual_sha256="$(sha256sum "${archive_name}" | awk '{print $1}')"
+  if [[ "${actual_sha256}" != "${mesa_sha256}" ]]; then
+    echo "[mesa] error: checksum mismatch"
+    echo "[mesa] expected: ${mesa_sha256}"
+    echo "[mesa] actual:   ${actual_sha256}"
+    exit 1
+  fi
+
+  unzip -q "${archive_name}" -d mesa
+  rm -f "${archive_name}"
+  if [ ! -d "mesa/mesa_build" ]; then
+    echo "[mesa] error: expected mesa/mesa_build in archive"
+    exit 1
+  fi
+  mv mesa/mesa_build .
+  rm -rf mesa
+  echo "[mesa] downloading prebuilt archive -- success"
+}
+
+mesa_package_source() {
+  echo "[mesa] packaging source -- skipped"
+}
+
+mesa_clean() {
+  echo "[mesa] cleaning up -- skipped"
+}
+
+mesa_patch() {
+  echo "[mesa] patching -- skipped"
+}
+
+mesa_build() {
+  echo "[mesa] building -- skipped (prebuilt)"
+}
+
+mesa_install() {
+  echo "[mesa] installing"
+  mkdir -p ares-deps/lib
+  mkdir -p ares-deps/include
+  mkdir -p ares-deps/share
+
+  cp -R build_temp/mesa_build/bin/. ares-deps/lib/
+  cp -R build_temp/mesa_build/include/. ares-deps/include/
+  cp -R build_temp/mesa_build/lib/. ares-deps/lib/
+  cp -R build_temp/mesa_build/share/. ares-deps/share/
+  echo "[mesa] installing -- success"
+}
